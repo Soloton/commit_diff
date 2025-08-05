@@ -150,6 +150,10 @@ main() {
     exit 0
   fi
 
+  if [[ -n "$template" && "${template##*.}" != "tpl" ]]; then
+    template="${template}.tpl"
+  fi
+
   local tpl_files=()
   if [[ -z "$template" ]]; then
     readarray -t tpl_files < <(find "$script_dir" -maxdepth 1 -type f -name "*.$template_ext")
