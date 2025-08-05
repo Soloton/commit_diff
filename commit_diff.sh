@@ -19,13 +19,14 @@ Options:
   -t, --template NAME    Template name (*.tpl) from the script directory
   -l, --locale LOCALE    Locale: en (default) or ru. If not found in map, passed as is.
   -L, --list             List all available templates
+  -a, --last-commit      Use last commit changes instead of staged changes for {diff}
   -h, --help             Show this help message
 
 If the template is not specified but exactly one .tpl is found, it will be used.
 Replacements:
   {locale} → English/Russian or your value
   {branch} → current git branch
-  {diff}   → git diff --cached
+  {diff}   → git diff --cached or last commit patch if -a specified
 EOF
 }
 
@@ -65,6 +66,7 @@ get_current_branch() {
 #   1 - template file path
 #   2 - locale string
 #   3 - branch name
+#   4 - diff file path
 # Outputs:
 #   Writes expanded template to stdout
 #######################################
@@ -72,20 +74,26 @@ expand_template() {
   local file="$1"
   local locale="$2"
   local branch="$3"
+  local diff_file="$4"
 
-  awk -v locale="$locale" -v branch="$branch" -v diff="$(cd "$git_root" && git diff --cached)" '
+  awk -v locale="$locale" -v branch="$branch" -v diff_file="$diff_file" '
+    function print_diff() {
+      while ((getline d < diff_file) > 0) print d
+      close(diff_file)
+    }
     {
-			line=$0
-			gsub(/\{locale\}/, locale, line)
-			gsub(/\{branch\}/, branch, line)
-			if (line ~ /{diff}/) {
-				sub(/{diff}/, "", line)
-				print line
-				print diff
-			} else {
-				print line
-			}
-    }' "$file"
+      line=$0
+      gsub("{locale}", locale, line)
+      gsub("{branch}", branch, line)
+      if (index(line, "{diff}")) {
+        sub("{diff}", "", line)
+        print line
+        print_diff()
+      } else {
+        print line
+      }
+    }
+  ' "$file"
 }
 
 #######################################
@@ -95,9 +103,9 @@ expand_template() {
 #   All command-line arguments
 #######################################
 main() {
-	if [[ -z "$git_root" ]]; then
-			err "Not in a git repository."
-	fi
+  if [[ -z "$git_root" ]]; then
+    err "Not in a git repository."
+  fi
 
   template_ext="tpl"
   declare -A locale_map=(["en"]="English" ["ru"]="Russian")
@@ -105,6 +113,7 @@ main() {
   local template=""
   local locale="en"
   local mode="run"
+  local use_last_commit="false"
 
   # Parse arguments
   while [[ $# -gt 0 ]]; do
@@ -119,6 +128,10 @@ main() {
         ;;
       -L | --list)
         mode="list"
+        shift
+        ;;
+      -a | --last-commit)
+        use_last_commit="true"
         shift
         ;;
       -h | --help)
@@ -137,7 +150,6 @@ main() {
     exit 0
   fi
 
-  # Template check and selection
   local tpl_files=()
   if [[ -z "$template" ]]; then
     readarray -t tpl_files < <(find "$script_dir" -maxdepth 1 -type f -name "*.$template_ext")
@@ -146,7 +158,12 @@ main() {
     elif [[ ${#tpl_files[@]} -eq 0 ]]; then
       err "No *.$template_ext templates found in $script_dir"
     else
-      err "Template (-t) is not specified. Multiple are available: $(printf '%s, ' "${tpl_files[@]}")"
+      echo "Error: Multiple template files found in $script_dir:"
+      local f
+      for f in "${tpl_files[@]}"; do
+        echo "  - $(basename "$f")"
+      done
+      err "Please specify one of them using -t|--template."
     fi
   fi
 
@@ -166,9 +183,24 @@ main() {
   local branch
   branch="$(get_current_branch)"
 
-  expand_template "$template_path" "$locale_str" "$branch" # | xclip -selection clipboard
+  # Use a temp file for diff content
+  local diff_file
+  diff_file=$(mktemp)
+  trap 'rm -f "$diff_file"' EXIT
 
-  echo 'Wrap the answer in triple backticks (```).'
+  if [[ "$use_last_commit" == "true" ]]; then
+    (cd "$git_root" && git show --pretty= --no-color) > "$diff_file"
+    if [[ ! -s "$diff_file" ]]; then
+      err "No changes found in the last commit."
+    fi
+  else
+    (cd "$git_root" && git diff --cached) > "$diff_file"
+    if [[ ! -s "$diff_file" ]]; then
+      err "No staged changes to include in diff."
+    fi
+  fi
+
+  expand_template "$template_path" "$locale_str" "$branch" "$diff_file"
 }
 
 main "$@"
