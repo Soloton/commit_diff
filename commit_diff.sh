@@ -72,7 +72,6 @@ expand_template() {
   local file="$1"
   local locale="$2"
   local branch="$3"
-  echo "git_root=$git_root"
 
   awk -v locale="$locale" -v branch="$branch" -v diff="$(cd "$git_root" && git diff --cached)" '
     {
