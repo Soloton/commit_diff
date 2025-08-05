@@ -1,13 +1,16 @@
-Write a commit message that accurately summarizes the changes made in the given `git diff` output, following the best practices and conventional commit convention as described below. Your response should look like this (no codeblock):
-
+Write a commit message that accurately summarizes the changes made in the given `git diff` output, following the best practices and conventional commit convention as described below. Your response should look like this (in codeblock):
+``` plain
 <type>(<optional scope>): <subject>
 
 <BODY (bullet points)>
+```
 
 Example:
+``` plain
 chore(deps): update library versions
 
 - Update Kotlin version from `0.1.0` to `0.2.0`
+```
 
 Here are some best practices for writing commit messages:
 - Write clear, concise, and descriptive messages that explain the changes made in the commit
