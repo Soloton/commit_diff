@@ -1,7 +1,19 @@
 # commit\_diff
 
+> Translations: [EN](./README.md), [RU](./README-ru.md)
+
 A handy CLI tool to generate a commit message template based on your staged git changes (or the last commit), using customizable templates.
 Supports automatic placeholder replacement for diff, branch, and locale in the output.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Placeholders](#placeholders)
+- [Example Workflow](#example-workflow)
+- [Notes](#notes)
+- [License](#license)
 
 ---
 
