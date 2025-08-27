@@ -30,19 +30,31 @@
 
 ## Установка
 
-1. Клонируйте или скопируйте репозиторий в любую директорию, например, `~/code/commit_diff`.
-2. Сделайте скрипт исполняемым:
+Можно установить с помощью `curl` или `wget`:
 
-   ```sh
-   chmod +x ~/code/commit_diff/commit_diff.sh
-   ```
-3. Создайте символическую ссылку в `/usr/local/bin` для удобного запуска:
+```sh
+curl -fsSL https://raw.githubusercontent.com/Soloton/commit_diff/master/install.sh | bash
+```
 
-   ```sh
-   sudo ln -s <полный_путь>/commit_diff.sh /usr/local/bin/commit_diff
-   ```
+или
 
-   Замените `<полный_путь>` на абсолютный путь к вашему `commit_diff.sh`.
+```sh
+wget -qO- https://raw.githubusercontent.com/Soloton/commit_diff/master/install.sh | bash
+```
+
+После установки:
+
+- Скрипт доступен как `commit_diff` (проверить можно командой `commit_diff --help`).
+
+- Шаблоны находятся в каталоге `/usr/local/share/commit_diff/`.
+Вы можете добавлять туда свои файлы `*.tpl`.
+
+Если после установки команда commit_diff недоступна, убедитесь, что каталог `/usr/local/bin` есть в переменной окружения `PATH`.
+Для этого добавьте строку в `~/.bashrc` или `~/.zshrc`:
+
+``` sh
+export PATH=$PATH:/usr/local/bin
+```
 
 ---
 

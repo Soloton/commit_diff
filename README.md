@@ -30,19 +30,31 @@ Supports automatic placeholder replacement for diff, branch, and locale in the o
 
 ## Installation
 
-1. Clone or copy this repository to any location, e.g. `~/code/commit_diff`.
-2. Make the script executable:
+Can be installed using `curl` or `wget`:
 
-   ```sh
-   chmod +x ~/code/commit_diff/commit_diff.sh
-   ```
-3. Create a symlink to `/usr/local/bin` for easy access:
+```sh
+curl -fsSL https://raw.githubusercontent.com/Soloton/commit_diff/master/install.sh | bash
+```
 
-   ```sh
-   sudo ln -s <full-path>/commit_diff.sh /usr/local/bin/commit_diff
-   ```
+or
 
-   Replace `<full-path>` with the absolute path to your `commit_diff.sh`.
+```sh
+wget -qO- https://raw.githubusercontent.com/Soloton/commit_diff/master/install.sh | bash
+```
+
+After installation:
+
+- The script is available as `commit_diff` (you can check it with the command `commit_diff --help`).
+
+- The templates are located in the `/usr/local/share/commit_diff/` directory.
+You can add your `*.tpl` files there.
+
+If the commit_diff command is not available after installation, make sure that the `/usr/local/bin` directory is in the `PATH` environment variable.
+To do this, add the line to `~/.bashrc` or `~/.zshrc`:
+
+``` sh
+export PATH=$PATH:/usr/local/bin
+```
 
 ---
 
