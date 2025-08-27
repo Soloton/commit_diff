@@ -1,36 +1,37 @@
-# commit\_diff
+# commit_diff — CLI tool for generating commit messages
 
-> Translations: [EN](./README.md), [RU](./README-ru.md)
+English version README: [EN](./README.md), [RU](./README-ru.md)
 
-A handy CLI tool to generate a commit message template based on your staged git changes (or the last commit), using customizable templates.
-Supports automatic placeholder replacement for diff, branch, and locale in the output.
+A convenient CLI tool that generates a commit message template based on Git changes (or the last commit), using customizable templates. It supports automatic substitution of `{diff}`, `{branch}`, and `{locale}`.
+
+---
 
 ## Table of Contents
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Placeholders](#placeholders)
-- [Example Workflow](#example-workflow)
-- [Notes](#notes)
-- [License](#license)
+* [Features](#features)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Placeholders](#placeholders)
+* [Examples](#examples)
+* [Notes](#notes)
+* [License](#license)
 
 ---
 
 ## Features
 
-* Insert a summary of your staged git diff or last commit into a template
-* Use placeholders (`{diff}`, `{branch}`, `{locale}`) in `.tpl` template files
-* Automatically selects template if only one is present
-* Helpful error messages if multiple templates are present
-* Locale substitution (e.g. `en` → English, `ru` → Russian)
-* Outputs formatted result to stdout (can be piped or copied)
+* Inserts a short description of changes from `git diff --cached` or the last commit.
+* Supports placeholders `{diff}`, `{branch}`, `{locale}` in `*.tpl` templates.
+* Automatically selects a template if only one is present.
+* Provides detailed errors when multiple templates exist.
+* Supports localization (`en` → English, `ru` → Russian).
+* Outputs the result to `stdout` (can be redirected or copied).
 
 ---
 
 ## Installation
 
-Can be installed using `curl` or `wget`:
+Install via `curl` or `wget`:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Soloton/commit_diff/master/install.sh | bash
@@ -44,17 +45,16 @@ wget -qO- https://raw.githubusercontent.com/Soloton/commit_diff/master/install.s
 
 After installation:
 
-- The script is available as `commit_diff` (you can check it with the command `commit_diff --help`).
+* The script is available as `commit_diff` (verify with `commit_diff --help`).
+* Templates are stored in `/usr/local/share/commit_diff/`. You can add your own `*.tpl` files there.
 
-- The templates are located in the `/usr/local/share/commit_diff/` directory.
-You can add your `*.tpl` files there.
+If `commit_diff` is not found, make sure `/usr/local/bin` is included in your `$PATH`. Usually this is already configured, but if needed, add:
 
-If the commit_diff command is not available after installation, make sure that the `/usr/local/bin` directory is in the `PATH` environment variable.
-To do this, add the line to `~/.bashrc` or `~/.zshrc`:
-
-``` sh
-export PATH=$PATH:/usr/local/bin
+```sh
+export PATH="$PATH:/usr/local/bin"
 ```
+
+to your `~/.bashrc` or `~/.zshrc`.
 
 ---
 
@@ -66,65 +66,68 @@ commit_diff [OPTIONS]
 
 **Options:**
 
-* `-t`, `--template NAME`
-  Use the specified template file (`*.tpl`) from the script directory.
-* `-l`, `--locale LOCALE`
-  Set the locale (e.g. `en` or `ru`). If not found in map, uses the value as is.
-* `-L`, `--list`
-  List all available template files.
-* `-a`, `--last-commit`
-  Use the last commit changes instead of staged changes for `{diff}`.
-* `-h`, `--help`
-  Show the help message.
+* `-t`, `--template NAME` — use the specified template `NAME.tpl`.
+* `-l`, `--locale LOCALE` — set locale (`en` or `ru`). If not mapped, the value is used as is.
+* `-L`, `--list` — list available templates.
+* `-a`, `--last-commit` — use the last commit diff instead of staged changes.
+* `-h`, `--help` — show help.
 
-If a template is not specified and there is exactly one `.tpl` in the directory, it will be used automatically.
+If no template is specified and only one `*.tpl` is present, it will be selected automatically.
 
 ---
 
 ## Placeholders
 
-* `{diff}` — replaced by the output of `git diff --cached` (or last commit if `-a` is used)
-* `{branch}` — replaced by the current git branch name
-* `{locale}` — replaced by the mapped locale string (e.g. `en` → English)
+* `{diff}` — replaced with the output of staged `git diff --cached` (or last commit diff if `-a` is used).
+* `{branch}` — replaced with the current Git branch name.
+* `{locale}` — replaced with the string corresponding to the locale (`en` → English, `ru` → Russian).
 
 ---
 
-## Example Workflow
+## Examples
 
-1. **Prepare a template file**
-   Place your `my_template.tpl` in the same directory as `commit_diff.sh`.
-   Example template:
+1. Example of using your own template
 
-   ```
-   feat({branch}): commit for {locale}
+1. Prepare your template `my_template.tpl` and place it in `/usr/local/share/commit_diff/`.
+2. Inside your project, run:
 
-   - Summary of changes:
-   {diff}
-   ```
+```sh
+git add <files>
+commit_diff -t my_template -l ru
+```
 
-2. **Use in your git project**
+or:
 
-   ```sh
-   git add <files>
-   commit_diff -t my_template -l en
-   ```
+```sh
+commit_diff -t my_template -l ru -a
+```
 
-   or, to use the last commit diff:
-00
-3. 
-   ```sh
-   commit_diff -t my_template -l en -a
-   ```
+3. Copy the result and paste it into the commit message or PR description.
 
-3. **Copy or pipe the output as needed for your commit message or PR description.**
+2. Example of using a template if there is only one template in the shared directory
+
+1. Inside your project, run:
+
+```sh
+git add <files>
+commit_diff | xclip -sel clip
+```
+
+or:
+
+```sh
+commit_diff -a | xclip -sel clip
+```
+
+2. Copy the result and paste it into your commit message or PR description.
 
 ---
 
 ## Notes
 
-* You must run `commit_diff` from within a git repository.
-* Template files must have the `.tpl` extension and reside in the same directory as `commit_diff.sh`.
-* If there are multiple templates, specify one using `-t`.
+* Must be run inside a Git repository.
+* Template files `*.tpl` are stored in `/usr/local/share/commit_diff/`.
+* If multiple templates exist, specify one using `-t`.
 
 ---
 
@@ -132,6 +135,4 @@ If a template is not specified and there is exactly one `.tpl` in the directory,
 
 MIT
 
----
-
-*Feel free to suggest improvements or open issues!*
+Contributions and feedback are welcome!
